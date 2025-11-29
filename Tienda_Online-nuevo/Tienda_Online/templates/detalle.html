@@ -1,10 +1,1 @@
-<!-- templates/tienda/producto_detail.html (snippet) -->
-<h1>{{ object.nombre }}</h1>
-<div class="galeria">
-  {% for img in object.imagenes.all %}
-    <img src="{{ img.imagen.url }}" alt="{{ object.nombre }}">
-  {% endfor %}
-</div>
-<p>{{ object.descripcion }}</p>
-<p>Precio base: {{ object.precio_base }}</p>
-<a href="{% url 'tienda:crear_pedido' %}?producto={{ object.id }}" class="btn">Solicitar este producto</a>
+CREO OTRO
