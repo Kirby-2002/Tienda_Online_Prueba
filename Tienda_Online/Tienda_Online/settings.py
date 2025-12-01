@@ -105,8 +105,9 @@ STATICFILES_DIRS = [STATIC_DIR] # Apunta a la carpeta static global
 
 # 💡 CONFIGURACIÓN MEDIA (Archivos subidos por usuarios)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = [STATIC_DIR]
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
