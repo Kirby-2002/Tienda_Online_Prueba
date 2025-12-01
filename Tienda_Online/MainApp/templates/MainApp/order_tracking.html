@@ -4,45 +4,156 @@
 {% block title %}Seguimiento de Pedido #{{ order.id }}{% endblock %}
 
 {% block content %}
-<h2>Seguimiento de tu Pedido</h2>
-<p>Token de seguimiento: <strong>{{ order.token }}</strong></p>
-
-<h3>Datos del Pedido</h3>
-<ul>
-    <li><strong>Cliente:</strong> {{ order.customer_name }}</li>
-    <li><strong>Producto de Referencia:</strong> {% if order.product_ref %}{{ order.product_ref.name }}{% else %}Personalizado{% endif %}</li>
-    <li><strong>Descripción:</strong> {{ order.description }}</li>
-    <li><strong>Fecha Solicitada:</strong> {% if order.requested_date %}{{ order.requested_date }}{% else %}Sin especificar{% endif %}</li>
-    <li><strong>Solicitado el:</strong> {{ order.created|date:"d M Y H:i" }}</li>
-</ul>
-
-<hr>
-
-<h3>Estado Actual</h3>
-<p style="font-size: 1.5em; color: 
-    {% if order.status == 'finalizada' %}green
-    {% elif order.status == 'cancelada' %}red
-    {% elif order.status == 'en_proceso' %}blue
-    {% else %}orange
-    {% endif %};">
-    <strong>Estado:</strong> {{ order.get_status_display }}
-</p>
-
-<p style="font-size: 1.5em;">
-    <strong>Estado de Pago:</strong> {{ order.get_payment_status_display }}
-</p>
-
-<hr>
-
-<h3>Imágenes de Referencia</h3>
-{% if order.images.all %}
-    <div class="reference-images">
-        {% for img in order.images.all %}
-            <img src="{{ img.image.url }}" alt="Imagen de referencia" width="150" style="margin-right: 10px;">
-        {% endfor %}
+<div class="container">
+    <!-- Encabezado -->
+    <div class="mb-4">
+        <h2 class="mb-2">Seguimiento de tu Pedido</h2>
+        <p class="text-muted">Token: <code>{{ order.token }}</code></p>
     </div>
-{% else %}
-    <p>No se subieron imágenes de referencia para este pedido.</p>
-{% endif %}
+
+    <div class="row">
+        <!-- Datos del Pedido -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Datos del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4"><strong>ID Pedido:</strong></dt>
+                        <dd class="col-sm-8">#{{ order.id }}</dd>
+
+                        <dt class="col-sm-4"><strong>Cliente:</strong></dt>
+                        <dd class="col-sm-8">{{ order.customer_name }}</dd>
+
+                        <dt class="col-sm-4"><strong>Producto:</strong></dt>
+                        <dd class="col-sm-8">
+                            {% if order.product_ref %}
+                                <a href="{% url 'product_detail' slug=order.product_ref.slug %}">
+                                    {{ order.product_ref.name }}
+                                </a>
+                            {% else %}
+                                <span class="badge bg-info">Personalizado</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4"><strong>Descripción:</strong></dt>
+                        <dd class="col-sm-8">{{ order.description|truncatechars:100 }}</dd>
+
+                        <dt class="col-sm-4"><strong>Fecha Solicitada:</strong></dt>
+                        <dd class="col-sm-8">
+                            {% if order.requested_date %}
+                                {{ order.requested_date|date:"d M Y" }}
+                            {% else %}
+                                <span class="text-muted">Sin especificar</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4"><strong>Solicitado:</strong></dt>
+                        <dd class="col-sm-8">{{ order.created|date:"d M Y H:i" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado Actual -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Estado Actual</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Estado del Pedido -->
+                    <div class="mb-3">
+                        <small class="text-muted">Estado del Pedido</small>
+                        <p>
+                            <span class="badge 
+                                {% if order.status == 'finalizada' %}bg-success
+                                {% elif order.status == 'cancelada' %}bg-danger
+                                {% elif order.status == 'en_proceso' %}bg-primary
+                                {% else %}bg-warning
+                                {% endif %} 
+                                fs-6">
+                                {{ order.get_status_display }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Estado de Pago -->
+                    <div class="mb-3">
+                        <small class="text-muted">Estado de Pago</small>
+                        <p>
+                            <span class="badge 
+                                {% if order.payment_status == 'pagado' %}bg-success
+                                {% elif order.payment_status == 'pendiente' %}bg-warning
+                                {% elif order.payment_status == 'rechazado' %}bg-danger
+                                {% else %}bg-secondary
+                                {% endif %} 
+                                fs-6">
+                                {{ order.get_payment_status_display }}
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Timeline visual -->
+                    <div class="mt-4">
+                        <h6>Progreso:</h6>
+                        <div class="progress" style="height: 25px;">
+                            {% if order.status == 'finalizada' %}
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%">Completado</div>
+                            {% elif order.status == 'en_proceso' %}
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 66%">En Proceso</div>
+                            {% elif order.status == 'cancelada' %}
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 0%">Cancelado</div>
+                            {% else %}
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 33%">Pendiente</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Imágenes de Referencia -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Imágenes de Referencia</h5>
+        </div>
+        <div class="card-body">
+            {% if order.images.all %}
+                <div class="row g-3">
+                    {% for img in order.images.all %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <img src="{{ img.image.url }}" class="card-img-top" alt="Imagen de referencia" style="height: 200px; object-fit: cover;">
+                            <div class="card-footer text-muted small">
+                                Subida: {{ img.uploaded|date:"d M Y" }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                        <path d="m8.93.456.003-.002.134-.534a1.5 1.5 0 1 0-2.993 0l.134.534.003.002.012.047.034.1.06.177.108.331.076.179c.035.083.088.19.14.315.052.126.115.27.182.425a7 7 0 0 0 .14.315 1 1 0 0 0 .137.156.5.5 0 0 0 .4.158h.002z"/>
+                    </svg>
+                    No se subieron imágenes de referencia para este pedido.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botón de regreso -->
+    <div class="mt-4">
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"/>
+            </svg>
+            Volver al catálogo
+        </a>
+    </div>
+</div>
 
 {% endblock %}
