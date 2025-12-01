@@ -8,7 +8,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
-# Rutas para archivos STATIC y MEDIA
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
 
@@ -105,9 +104,10 @@ STATICFILES_DIRS = [STATIC_DIR] # Apunta a la carpeta static global
 
 # 💡 CONFIGURACIÓN MEDIA (Archivos subidos por usuarios)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = [MEDIA_DIR]
 
 # Default primary key field type
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
