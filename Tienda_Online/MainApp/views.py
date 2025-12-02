@@ -96,9 +96,14 @@ def order_request(request, product_slug=None):
 
 def order_track(request, token):
     order = get_object_or_404(Order, token=token)
-    
+
     context = {
         'order': order,
     }
-    # 🚨 CORRECCIÓN 4: De 'personal_shop/order_tracking.html' a 'MainApp/order_tracking.html'
     return render(request, 'MainApp/order_tracking.html', context)
+
+
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, "order_detail.html", {"order": order})
+

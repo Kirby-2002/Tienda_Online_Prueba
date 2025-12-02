@@ -15,5 +15,9 @@ urlpatterns = [
     path('solicitar/', views.order_request, name='order_request'),
     
     # Seguimiento del Pedido (Req. 10)
-    path('seguimiento/<uuid:token>/', views.order_track, name='order_track'),
+    path("seguimiento/<str:token>/", views.order_track, name="order_track"),
+
+
+    path("order/<uuid:order_id>/", views.order_detail, name="order_detail"),
+
 ]

@@ -88,7 +88,7 @@ class Order(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     status = models.CharField("Estado", max_length=30, choices=STATUS_CHOICES, default='solicitado')
     payment_status = models.CharField("Estado de pago", max_length=20, choices=PAYMENT_STATUS, default='pendiente')
-    total_price = models.PositiveIntegerField(("Precio final"))
+    total_price = models.PositiveIntegerField("Precio final", default=0)
 
     class Meta:
         verbose_name = "Pedido"

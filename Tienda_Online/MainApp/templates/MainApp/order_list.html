@@ -1,0 +1,66 @@
+{% extends "MainApp/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="mb-4 text-center fw-bold" style="color:#1a1a1a;">
+        🔍 Seguimiento de tus Pedidos
+    </h2>
+
+    <div class="card shadow-sm border-0 p-3">
+
+        {% if orders %}
+            <div class="list-group">
+
+                {% for order in orders %}
+                    <div class="list-group-item mb-3 shadow-sm rounded">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+                                <h5 class="fw-bold mb-1" style="color:#0d6efd;">
+                                    Pedido #{{ order.id }}
+                                </h5>
+
+                                <p class="mb-1 text-muted">
+                                    Fecha: {{ order.created_at|date:"d/m/Y H:i" }}
+                                </p>
+
+                                <span class="badge
+                                    {% if order.status == 'en_preparacion' %} bg-warning text-dark
+                                    {% elif order.status == 'listo' %} bg-primary
+                                    {% elif order.status == 'entregado' %} bg-success
+                                    {% elif order.status == 'urgente' %} bg-danger
+                                    {% else %} bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </div>
+
+                            <div class="text-end">
+                                <h5 class="fw-bold" style="color:#009933;">
+                                    ${{ order.total }}
+                                </h5>
+
+                                <a href="{% url 'order_track' order.token %}"
+                                class="btn btn-outline-primary btn-sm mt-2">
+                                Ver Detalle
+                            </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <h4 class="text-center text-muted py-5">
+                No tienes pedidos asociados a este enlace.
+            </h4>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
