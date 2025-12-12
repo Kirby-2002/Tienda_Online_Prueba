@@ -1,0 +1,533 @@
+{% extends "MainApp/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📊 Dashboard de Reportes</h2>
+    
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Filtros del Reporte</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Fecha desde:</label>
+                    <input type="date" name="date_from" class="form-control" 
+                           value="{{ filter_params.date_from|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Fecha hasta:</label>
+                    <input type="date" name="date_to" class="form-control" 
+                           value="{{ filter_params.date_to|default:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Estado del pedido:</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option value="solicitado" {% if filter_params.status == 'solicitado' %}selected{% endif %}>
+                            Solicitado
+                        </option>
+                        <option value="aprobado" {% if filter_params.status == 'aprobado' %}selected{% endif %}>
+                            Aprobado
+                        </option>
+                        <option value="en_proceso" {% if filter_params.status == 'en_proceso' %}selected{% endif %}>
+                            En proceso
+                        </option>
+                        <option value="realizada" {% if filter_params.status == 'realizada' %}selected{% endif %}>
+                            Realizada
+                        </option>
+                        <option value="entregada" {% if filter_params.status == 'entregada' %}selected{% endif %}>
+                            Entregada
+                        </option>
+                        <option value="finalizada" {% if filter_params.status == 'finalizada' %}selected{% endif %}>
+                            Finalizada
+                        </option>
+                        <option value="cancelada" {% if filter_params.status == 'cancelada' %}selected{% endif %}>
+                            Cancelada
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Plataforma:</label>
+                    <select name="platform" class="form-select">
+                        <option value="">Todas las plataformas</option>
+                        <option value="web" {% if filter_params.platform == 'web' %}selected{% endif %}>
+                            Sitio Web
+                        </option>
+                        <option value="instagram" {% if filter_params.platform == 'instagram' %}selected{% endif %}>
+                            Instagram
+                        </option>
+                        <option value="whatsapp" {% if filter_params.platform == 'whatsapp' %}selected{% endif %}>
+                            WhatsApp
+                        </option>
+                        <option value="facebook" {% if filter_params.platform == 'facebook' %}selected{% endif %}>
+                            Facebook
+                        </option>
+                        <option value="presencial" {% if filter_params.platform == 'presencial' %}selected{% endif %}>
+                            Presencial
+                        </option>
+                        <option value="otro" {% if filter_params.platform == 'otro' %}selected{% endif %}>
+                            Otro
+                        </option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Aplicar Filtros
+                    </button>
+                    <a href="{% url 'dashboard_reports' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Limpiar Filtros
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Tarjetas de resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">TOTAL PEDIDOS</h6>
+                            <h2 class="mb-0">{{ total_orders }}</h2>
+                        </div>
+                        <i class="bi bi-cart-check display-6"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">PAGADOS</h6>
+                            <h2 class="mb-0" id="paidOrders">0</h2>
+                        </div>
+                        <i class="bi bi-credit-card display-6"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">EN PROCESO</h6>
+                            <h2 class="mb-0" id="inProcessOrders">0</h2>
+                        </div>
+                        <i class="bi bi-gear display-6"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">SOLICITADOS</h6>
+                            <h2 class="mb-0" id="requestedOrders">0</h2>
+                        </div>
+                        <i class="bi bi-clock display-6"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart"></i> Pedidos por Estado
+                    </h5>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <div style="width: 100%; max-width: 400px; height: 300px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart"></i> Pedidos por Plataforma
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="platformChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tablas -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-star"></i> Productos Más Solicitados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="popularProductsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Pedidos</th>
+                                    <th class="text-center">%</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popularProductsBody">
+                                <!-- Se llenará con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar"></i> Pedidos por Mes (Últimos 6 meses)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JSON Scripts para pasar datos de Django a JavaScript -->
+{{ orders_by_status|json_script:"statusData" }}
+{{ orders_by_platform|json_script:"platformData" }}
+{{ popular_products|json_script:"popularProductsData" }}
+{{ monthly_orders|json_script:"monthlyOrdersData" }}
+{{ revenue_by_payment|json_script:"revenueData" }}
+
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+<style>
+    .card {
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+    .table th {
+        font-weight: 600;
+    }
+    canvas {
+        max-width: 100%;
+    }
+</style>
+
+<script>
+    // Obtener datos de los scripts JSON
+    const statusData = JSON.parse(document.getElementById('statusData').textContent);
+    const platformData = JSON.parse(document.getElementById('platformData').textContent);
+    const popularProducts = JSON.parse(document.getElementById('popularProductsData').textContent);
+    const monthlyOrders = JSON.parse(document.getElementById('monthlyOrdersData').textContent);
+    const revenueData = JSON.parse(document.getElementById('revenueData').textContent);
+    
+    // Mapeos para nombres legibles
+    const statusLabels = {
+        'solicitado': 'Solicitado',
+        'aprobado': 'Aprobado',
+        'en_proceso': 'En Proceso',
+        'realizada': 'Realizada',
+        'entregada': 'Entregada',
+        'finalizada': 'Finalizada',
+        'cancelada': 'Cancelada'
+    };
+    
+    const platformLabels = {
+        'web': 'Sitio Web',
+        'facebook': 'Facebook',
+        'instagram': 'Instagram',
+        'whatsapp': 'WhatsApp',
+        'presencial': 'Presencial',
+        'otro': 'Otro'
+    };
+    
+    // Actualizar tarjetas de resumen
+    function updateSummaryCards() {
+        let paidCount = 0;
+        let inProcessCount = 0;
+        let requestedCount = 0;
+        
+        statusData.forEach(item => {
+            if (item.status === 'pagado' || item.status === 'parcial') {
+                paidCount += item.total;
+            }
+            if (item.status === 'en_proceso') {
+                inProcessCount = item.total;
+            }
+            if (item.status === 'solicitado') {
+                requestedCount = item.total;
+            }
+        });
+        
+        document.getElementById('paidOrders').textContent = paidCount;
+        document.getElementById('inProcessOrders').textContent = inProcessCount;
+        document.getElementById('requestedOrders').textContent = requestedCount;
+    }
+    
+    // Crear gráfico de estados
+    function createStatusChart() {
+        if (statusData.length === 0) {
+            document.getElementById('statusChart').parentElement.innerHTML = 
+                '<p class="text-muted text-center">No hay datos disponibles</p>';
+            return;
+        }
+        
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: statusData.map(item => statusLabels[item.status] || item.status),
+                datasets: [{
+                    data: statusData.map(item => item.total),
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#8AC926', '#FF595E'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Crear gráfico de plataformas
+    function createPlatformChart() {
+        if (platformData.length === 0) {
+            document.getElementById('platformChart').parentElement.innerHTML = 
+                '<p class="text-muted text-center">No hay datos disponibles</p>';
+            return;
+        }
+        
+        const ctx = document.getElementById('platformChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: platformData.map(item => platformLabels[item.platform] || item.platform),
+                datasets: [{
+                    label: 'Cantidad de Pedidos',
+                    data: platformData.map(item => item.total),
+                    backgroundColor: '#36A2EB',
+                    borderColor: '#1E88E5',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Llenar tabla de productos populares
+    function populatePopularProductsTable() {
+        const tbody = document.getElementById('popularProductsBody');
+        
+        if (popularProducts.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        No hay datos disponibles
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Calcular total para porcentajes
+        const totalOrders = popularProducts.reduce((sum, item) => sum + item.total_orders, 0);
+        
+        // Ordenar por cantidad
+        const sortedProducts = [...popularProducts].sort((a, b) => b.total_orders - a.total_orders);
+        
+        // Limitar a top 5
+        const topProducts = sortedProducts.slice(0, 5);
+        
+        tbody.innerHTML = '';
+        topProducts.forEach((product, index) => {
+            const percentage = totalOrders > 0 ? Math.round((product.total_orders / totalOrders) * 100) : 0;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>
+                    <span class="badge bg-primary me-2">${index + 1}</span>
+                    ${product.product_ref__name || 'Producto sin nombre'}
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-secondary">${product.total_orders}</span>
+                </td>
+                <td class="text-center">
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: ${percentage}%" 
+                             aria-valuenow="${percentage}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">${percentage}%</small>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+    
+    // Crear gráfico mensual
+    function createMonthlyChart() {
+        if (monthlyOrders.length === 0) {
+            document.getElementById('monthlyChart').parentElement.innerHTML = 
+                '<p class="text-muted text-center">No hay datos disponibles</p>';
+            return;
+        }
+        
+        // Ordenar por mes
+        const sortedMonthly = [...monthlyOrders].sort((a, b) => a.month.localeCompare(b.month));
+        
+        // Formatear meses (ej: 2024-01 → Ene 2024)
+        const monthLabels = sortedMonthly.map(item => {
+            const [year, month] = item.month.split('-');
+            const date = new Date(year, month - 1);
+            return date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+        });
+        
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [{
+                    label: 'Pedidos por Mes',
+                    data: sortedMonthly.map(item => item.total),
+                    borderColor: '#4BC0C0',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#4BC0C0',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Inicializar todo cuando la página cargue
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSummaryCards();
+        createStatusChart();
+        createPlatformChart();
+        populatePopularProductsTable();
+        createMonthlyChart();
+    });
+</script>
+{% endblock %}
