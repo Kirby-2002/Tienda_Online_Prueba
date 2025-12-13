@@ -3,6 +3,7 @@ gunicorn
 whitenoise
 psycopg2-binary
 pillow
-restframework
+djangorestframework
+django-filter
 cloudinary
 cloudinary-storage
