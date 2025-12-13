@@ -1,0 +1,8 @@
+Django>=4.2
+gunicorn
+whitenoise
+psycopg2-binary
+pillow
+restframework
+cloudinary
+cloudinary-storage
