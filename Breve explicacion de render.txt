@@ -1,0 +1,3 @@
+El proyecto Tienda_Online_Prueba se desplegó en Render con Python 3 y despliegue automático desde GitHub. 
+Se ejecutó usando Gunicorn, con el comando python manage.py collectstatic --noinput && gunicorn Tienda_Online.wsgi. 
+También se configuraron variables de entorno para manejar de forma segura las KEYS de Django y Cloudinary.
