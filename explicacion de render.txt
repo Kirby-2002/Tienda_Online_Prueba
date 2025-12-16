@@ -1,0 +1,5 @@
+El proyecto Tienda_Online_Prueba fue desplegado en Render como un Web Service con Python 3, vinculado a un repositorio de GitHub
+con despliegue automático desde la rama main. Durante el despliegue se instalaron las dependencias del proyecto y la aplicación 
+se ejecutó en producción mediante Gunicorn, utilizando el comando python manage.py collectstatic --noinput && gunicorn Tienda_Online.wsgi. 
+Además, se configuraron variables de entorno para gestionar de forma segura la DJANGO_SECRET_KEY y las credenciales de Cloudinary, 
+necesarias para el correcto funcionamiento de la aplicación.
